@@ -1,0 +1,444 @@
+<table tabindex="1" class='wall hall' id='tab' onKeyDown="keyr_glob(event);">
+    <tr style="height:10%">
+        <td>
+          <table class='wall hall tb'>
+          <tr>
+          <td id="hd_status" onclick='q_statusclick();' class='ltext' style='width:20%;padding:5px;'>
+          </td>
+          <td class='center vcenter' onclick="print_check();">
+            <img style='max-height:80%;height:100%;width:auto' src='images/print.png'/>
+          </td>
+          <td id="delbox" class='center vcenter'  style='width:20%; padding:5px;' onclick='q_delbox();'>
+            <img style='max-height:80%;height:100%;width:auto' src='images/trash.png'/> 
+          </td>
+          </tr>
+          </table>
+        </td>
+    </tr>
+    <tr>
+        <td class="bg0">
+        <div class="bg0 hall scroll" id='div_content'>
+            <table class='tb wall norm' id='box_content'> </table>
+        </div>
+        </td>
+    </tr>
+    <tr style="height:10%">
+        <td>
+          <table class='wall hall tb'>
+          <tr>
+          <td id="hd_link" onclick='linkclick();' class='center vcenter' style='width:20%;padding:5px;'>
+            <img style='max-height:80%;height:100%;width:auto' src='images/unlink.png'/> 
+          </td>
+          <td id="addprice" class='center vcenter' style='width:35%;padding:5px;' onclick='addpriceclick();'>
+            <img style='max-height:80%;height:100%;width:auto' src='images/add.png'/> 
+          </td>
+          <td id="box_summa" class='norm ice bold rtext vcenter' style='padding:5px;' >
+          </td>
+          <td id="hd_close" class='center vcenter' style='width:20%;padding:5px;' onclick='closebox();'>
+            <img style='max-height:80%;height:100%;width:auto' src='images/exit.png'/> 
+          </td>
+          </tr>
+          </table>
+        </td>
+    </tr>
+</table>
+
+        <div    id="pop" class="windowinfo wmaxcenter w90 h90" 
+                style="overflow:hidden" 
+                hidden >
+                <div class='infoline center small' style='height:10%'>
+                    <table class='infoline wall hall small vcenter'>
+                        <tr>
+                        <td class='vcenter center'>Выбор главной корзины</td><td class='sel rtext infolinebtn vcenter' style='padding-right:2%' onclick='pop.hidden=true;'>
+                        <img style='max-height:100%;height:70%' src='images/exit.png'></img></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class='h90 wall'>
+                    <table class='tb hall wall smallest' id='boxes'>
+                    </table>
+                </div>
+        </div>
+        <div    id="pop_prices" class="windowinfo wmaxleft w90 h90 hid" 
+                style="overflow:hidden" 
+                hidden >
+                <div class='infoline center small' style='height:10%'>
+                    <table class='infoline wall hall small vcenter'>
+                        <tr>
+                        <td class='sel ltext infolinebtn vcenter' style='padding-left:2%' onclick='click_updir();'>
+                        <img style='max-height:100%;height:70%' src='images/up.png'></img></td>
+                        <td class='vcenter center'>Выбор товара</td>
+                        <td class='sel ltext infolinebtn center vcenter w20' onclick='clickdown();'>
+                        <img id="imgdown" style='max-height:100%;height:70%' src='images/down.png'></img></td>  
+                        <td class='sel ltext infolinebtn center vcenter w20' onclick='clickup();'>
+                        <img id="imgup" style='max-height:100%;height:70%' src='images/go-up.png'></img></td>  
+                        <td class='sel rtext infolinebtn vcenter' style='padding-right:2%' onclick='pop_prices.hidden=true;'>
+                        <img style='max-height:100%;height:70%' src='images/exit.png'></img></td>
+                        </tr>
+                    </table>
+                </div>
+                <div class='h90 wall'>
+                    <table class='tb hall wall small' id='prices'>
+                    </table>
+                </div>
+        </div>
+        <div  tabindex="2"  id="numtouch" class="windowinfo wmaxcenter w90 h90 hid" onKeyDown="keyr(event);"
+                hidden >
+        </div>
+
+<script>
+    boxid=%id%;
+    LASTBOXID="";
+    isboxselect=false;
+    firstload();
+    tab.focus();
+function firstload(){
+    NUMVALUE='';
+    LASTBOXID="";
+    result=_getdata("/box/get?id="+boxid);
+    //alert(result);
+    json=JSON.parse(result);
+    if ((json['box_hd']['status']==0)||(json['box_hd']['status']==3)){
+        _relocate('/boxes');
+    }
+    LIDBOX=json['lastid'];
+    if (LIDBOX!=LASTBOXID){
+        LASTBOXID=LIDBOX;
+    }
+    putbox_hd(json['box_hd']);
+    putbox_ct(json['box_ct']);
+}
+function refstatus(){
+    async_get("/box/get?id="+boxid+"&lastid="+LASTBOXID,_refstatus);
+}
+function _refstatus(j){
+    json=JSON.parse(j);
+    if (!json['result']){
+        return;
+    }
+    LASTBOXID=json['lastid'];
+    putbox_hd(json['box_hd']);
+    putbox_ct(json['box_ct']);
+}
+function closebox(){
+    _relocate('/boxes');
+}
+function q_delbox(){
+    warn_alert("Вы действительно хотите расформировать корзину?",delbox);
+}
+function delbox(){
+    if (WARN_ANSWER){
+        result=_getdata("/box/del?id="+boxid);
+        json=JSON.parse(result);
+        if (json['result']){
+            _relocate('/boxes');
+        }else{
+            info_alert("Операция невозможна. Заказ помечен как исполненый или заблокирован.");
+        }
+    }
+    
+}
+function putbox_hd(b){
+    counts=parseInt(b['d_counts']);
+    idhd=parseInt(b['idhd']);
+    d_sub=parseInt(b['d_sub']);
+    status=parseInt(b['status']);
+    
+    if ((status==0)||(status==3)){
+        _relocate('/boxes');
+    }
+    box_status=document.getElementById('hd_status');
+    box_link=document.getElementById('hd_link');
+
+    if (status==0){
+        src="/images/b0.png";
+        bg='bg0';
+    }
+    if (status==1){
+        if (counts>0){
+            src="/images/b11.png";
+        }else{
+            src="/images/b1.png";
+        }
+        bg='bg0';
+    }
+    if (status==2){
+        src="/images/b2.png";
+        bg='bg0';
+    }
+    if (status==3){
+        src="/images/b3.png";
+        bg='bg0';
+    }
+    if (idhd!=0){
+        sidhd=idhd; if (idhd<10){  sidhd='0'+idhd; }
+        opn="<span class='small black bg bgh hid'>"+sidhd+"</span>";
+        hdico='/images/link.png';
+    }else{
+        opn="";
+        hdico='/images/unlink.png';
+    }
+    if (d_sub!=0){
+        bg='bgh';
+    }
+    sid=boxid; if (boxid<10){  sid='0'+boxid; }
+    box_status.innerHTML=
+        "<div class='wall hall ltext' style='padding-top:5px;float:left;'>"+  
+        "<span class='small black bg posr "+bg+"'>"+sid+"</span>"+opn+
+        "<img class='boxr' src='"+src+"'/>"+
+        "<span class='norm black posa'>"+counts+"</span"+
+        "</div>";
+    box_link.innerHTML=
+            "<img  style='max-height:80%;height:100%;width:auto' src='"+hdico+"'/>"
+    box=b;
+}
+function q_statusclick(){
+    if (box['status']==1){
+        m='Корзина готова?';
+    }else{
+        m='Корзина еще не готова?';
+    }
+   warn_alert(m,statusclick); 
+}
+function statusclick(){
+    if (WARN_ANSWER){
+            async_get("/box/setstatus?id="+boxid,_statusclick);
+    }
+}
+function putbox_ct(ct){
+    s="<tr><th>#</th><th>Наименование</th><th class='small'>Ст-сть</th><th class='small'>Количество</th></tr>";
+    summa=0;
+    for (i in ct){
+        trid='trid_'+i;
+        tdname='tdnm_'+i;
+        tdkol='tdkl_'+i;
+        id=ct[i]['id'];
+        n=parseInt(i)+1;
+        name=ct[i]['d_price'];
+        cena=parseFloat(ct[i]['d_cena']).toFixed(2);
+        cnt=parseFloat(ct[i]['count']).toFixed(3);
+        stsum=parseFloat(ct[i]['d_cena'])*parseFloat(ct[i]['count']);
+        st=stsum.toFixed(2);
+        if (ct[i]['storno']==1){   cl='bg3 flame';stsum=0; } else { cl=''; };
+        if (parseFloat(ct[i]['count'])==1){ clk=''; } else { clk='bold'; } 
+        summa+=stsum;
+        s+="<tr id='"+trid+"' class='"+cl+"'>"+
+        "<td class='center'>"+n+"</td>"+
+        "<td onclick='click_ct(this);' id='"+tdname+"'>"+name+"</td>"+
+        "<td class='small ice rtext vcenter'>"+st+"</td>"+
+        "<td onclick='click_ct(this);' id='"+tdkol+"' class='rtext "+clk+"' style='padding-right:2%'>"+cnt+"</td>"+
+        "</tr>";
+    }
+    box_summa.innerHTML=summa.toFixed(2);
+    box_content.innerHTML=s;
+    box_ct=ct;
+}
+function _statusclick(j){
+    
+}
+function addpriceclick(){
+    PRICE_CURRENT='0';
+    loadprice(0);
+    pop_prices.hidden=false;
+}
+function linkclick(){
+    if (box['idhd']!=0){
+            async_get("/box/unlink?id="+boxid,unlinkbox);
+    }else{
+        loadboxes();
+        pop.hidden=false;
+        isboxselect=true;
+    }
+}
+function q_boxclick(t){
+    id=parseInt(t.id.substr(4));
+    if ((boxes[id-1]['status']>0)&&(boxes[id-1]['status']<3)){
+        if (id==boxid){
+            return;
+        }
+    }
+    toboxid=id;
+    warn_alert("Привязать текущую корзину к корзине номер "+id+" ?",boxclick);
+}
+function boxclick(){
+    if (WARN_ANSWER){
+        async_get("/box/link?id="+boxid+"&to="+toboxid,linkbox);
+        return;
+    }
+}
+function linkbox(j){
+    json=JSON.parse(j);
+    if (!json['result']){
+        info_alert("Невозможно привязать корзину, ссылающуюся на текущую");
+        return;
+    }else{
+        pop.hidden=true;
+        isboxselect=false;
+    }
+}
+function unlinkbox(j){
+    json=JSON.parse(j);
+    if (!json['result']){
+        return;
+    }else{
+        return;
+    }
+}
+function priceclick(id){
+    p='price_'+id;
+    PR=pricelist[id]['id'];
+    if (pricelist[id]['istov']==0){
+        PRICE_CURRENT=PR;
+        loadprice(0);
+    }else{
+        result=_getdata("/box/ct/add?id="+boxid+"&code="+PR);
+        json=JSON.parse(result);
+        if (json['result']){
+            r=box_content.insertRow();
+            c=r.insertCell();
+            c.innerHTML="+";
+            div_content.scrollTop=div_content.scrollHeight;
+        }else{ info_alert("Операция невозможна.");  }
+    }
+}
+function click_updir(){
+        loadprice(1);
+}
+function print_check(){
+    
+    //async_get("/zakaz/list",_print_check);
+    async_get("/print/numbox?id="+boxid,_print_check);
+}
+function _print_check(){
+    
+}
+function click_ct(t){
+    tp=t.id.substr(0,4);
+    id=parseInt(t.id.substr(5));
+    idd=box_ct[id]['id'];
+    if (box_ct[id]['storno']==0){  st=1;  } else { st=0; }
+    BOX_ID=id;
+    if (tp=='tdnm'){
+        async_get("/box/ct/upd?idhd="+boxid+"&id="+idd+"&storno="+st,_click_ct);
+    }
+    if ((tp=='tdkl')&&(st==1)){
+        async_get("/template/numtouch.html",show_numtouch);
+    }
+}
+function _click_ct(j){
+    json=JSON.parse(j);
+    if (!json['result']){
+        info_alert("Операция невозможна.");
+        return;
+    }
+}
+function show_numtouch(t){
+    numtouch.innerHTML=t;
+    touch_count.innerHTML=box_ct[BOX_ID]['count'];
+    touch_name.innerHTML=box_ct[BOX_ID]['d_price'];
+    touch_count.className='rtext bg1 white';
+    numtouch.hidden=false;
+    numtouch.focus();
+    NUMVALUE="";
+}
+function edit_numtouch(th){
+    if (touch_count.className.indexOf("white")!=-1)
+        {t="";}
+    else
+        {t=touch_count.innerHTML;}
+    if (th.innerHTML=="&lt;"){
+        l=touch_count.innerHTML.length;
+        if (t==""){touch_count.innerHTML="";}
+        else{
+            if (l>0){touch_count.innerHTML=touch_count.innerHTML.substr(0,l-1);}
+        }
+        if (touch_count.innerHTML==""){
+            touch_count.innerHTML="0";
+        }
+        if (touch_count.innerHTML=="0"){
+            touch_count.className='rtext bg1 white';
+        }
+        return;
+    }
+    if ((t!="")&&(th.innerHTML=='.')&&(touch_count.innerHTML.indexOf(".")!=-1)){
+        return;
+    }
+    touch_count.innerHTML=t+th.innerHTML;
+    if (touch_count.innerHTML=="."){ touch_count.innerHTML="0."; }
+    touch_count.className='rtext bg1 yellow';
+}
+function put_kol(){
+    count=parseFloat(touch_count.innerHTML);
+    if (count>=0){
+        idd=box_ct[BOX_ID]['id'];
+        async_get("/box/ct/upd?idhd="+boxid+"&id="+idd+"&count="+count,_click_ct);
+    }
+}
+function keyr_glob(e)
+{
+    var key = e.keyCode;
+    if ((key>=48)&&(key<=57)){
+        NUMVALUE+=String.fromCharCode(key);
+    }
+    if (key==13){
+        //NUMVALUE='4600439920397';
+        //'2100691003828';
+        alert(NUMVALUE);
+        r=verifyEAN(NUMVALUE);
+        if (!r){info_alert("Невозможный штрихкод.")}
+        scaleEAN(NUMVALUE);
+        result=_getdata("/box/ct/add?id="+boxid+"&barcode="+NUMVALUE);
+        json=JSON.parse(result);
+        if (json['result']){
+            r=box_content.insertRow();
+            c=r.insertCell();
+            c.innerHTML="+";
+            div_content.scrollTop=div_content.scrollHeight;
+        }else{ info_alert("Операция невозможна.");  }
+        NUMVALUE="";
+    }
+    e.preventDefault();
+    e.stopPropagation();
+}
+function keyr(e)
+{
+    var key = e.keyCode;
+    if ((key>=48)&&(key<=57)){
+        NUMVALUE+=String.fromCharCode(key);
+    }
+    if (key==13){
+        r=verifyEAN(NUMVALUE);
+        if (!r){info_alert("Невозможный штрихкод.")}
+        scaleEAN(NUMVALUE);
+        touch_count.innerHTML=scale_count;
+        NUMVALUE="";
+    }
+    e.preventDefault();
+    e.stopPropagation();
+}
+function verifyEAN(shk){
+    if (shk.length<13){  return false;  }
+    shk="0000000000000"+shk;
+    shk=shk.substr(-13,13);
+    //alert(shk);
+    s1=0;
+    for (i=2;i<=12;i=i+2){ s1+=parseInt(shk[i-1]); }
+    s2=0;
+    for (i=1;i<13;i=i+2){ s2+=parseInt(shk[i-1]); }
+    r=(s1*3+s2)%10;
+    if (r!=0){ r=10-r; }
+    if (r==parseInt(shk.substr(-1,1))){  return true; }
+    else{ return false;}
+}
+function scaleEAN(shk){
+    scale_code=parseInt(shk.substr(2,5));
+    scale_count=shk.substr(7,2)+'.'+shk.substr(9,3);
+}
+setInterval(
+    function() {
+        if (isboxselect){
+            refboxes();
+        }
+        refstatus();
+    }, 2000);
+</script>

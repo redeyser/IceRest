@@ -1,0 +1,32 @@
+<div class="window w33 padd marg">
+    <table class="norm wall">
+        <tr class="ice sel" onclick='_relocate("/order");' ><td>Очередь</td></tr>
+    </table>
+</div>
+
+<div class="window w33 padd marg">
+    <table class="norm wall" id="login">
+        <tr class="ice sel bold" onclick='_relocate("/boxes");'><td>Корзины</td></tr>
+    </table>
+</div>
+<script>
+loadlogin();
+function loadlogin(){
+    async_get("/users/gets",_loadlogin);
+}
+function do_login(l){
+    async_get("/login?login="+l+"&password=1",_do_login);
+}
+function _do_login(t){
+    _relocate("/boxes")
+}
+function _loadlogin(t){
+    j=JSON.parse(t);
+    s="";
+    for ( i in j){
+        l = j[i]['login'];
+        s+= "<tr class='ice sel' onclick='do_login(\""+l+"\");'><td>"+l+"</td></tr>";
+    }
+    login.innerHTML=s;
+}
+</script>

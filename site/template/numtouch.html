@@ -1,0 +1,50 @@
+<table class='wall hall big'>
+    <tr style="height:10%">
+        <td class='ltext bg2' style='padding-left:2%'>Количество:</td>
+        <td class='rtext bg1 yellow' style='padding-right:5%' id='touch_count'></td>
+    </tr>
+    <tr >
+        <td id="touch_name" class='ltext bg2 norm' style='padding-left:2%;padding-right:2%'></td>
+        <td rowspan=2>
+            <table class='tb hall wall big'>
+                <tr>
+                    <td class='center vcenter' style="width:33%" onclick='edit_numtouch(this);'>7</td>
+                    <td class='center vcenter' style="width:33%" onclick='edit_numtouch(this);'>8</td>
+                    <td class='center vcenter' style="width:33%" onclick='edit_numtouch(this);'>9</td>
+                </tr>
+                <tr>
+                    <td class='center vcenter' style="width:33%" onclick='edit_numtouch(this);'>4</td>
+                    <td class='center vcenter' style="width:33%" onclick='edit_numtouch(this);'>5</td>
+                    <td class='center vcenter' style="width:33%" onclick='edit_numtouch(this);'>6</td>
+                </tr>
+                <tr>
+                    <td class='center vcenter' style="width:33%" onclick='edit_numtouch(this);'>1</td>
+                    <td class='center vcenter' style="width:33%" onclick='edit_numtouch(this);'>2</td>
+                    <td class='center vcenter' style="width:33%" onclick='edit_numtouch(this);'>3</td>
+                </tr>
+                <tr>
+                    <td class='center vcenter' style="width:33%" onclick='edit_numtouch(this);'>0</td>
+                    <td class='center vcenter' style="width:33%" onclick='edit_numtouch(this);'>.</td>
+                    <td class='center vcenter' style="width:33%" onclick='edit_numtouch(this);'>&lt</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr>
+        <td style='width:50%'>
+            <table class='tb hall wall big'>
+                <tr style="height:30%">
+                    <td class='center vcenter' style="width:50%" onclick='kol=touch_count.innerHTML;if (kol==""){kol="0";}kol=parseFloat(kol)+1;if (kol<=100){touch_count.innerHTML=kol;touch_count.className="rtext bg1 white";}'>+</td>
+                    <td class='center vcenter' style="width:50%" onclick='kol=touch_count.innerHTML;if (kol==""){kol="0";}kol=parseFloat(kol)-1;if (kol>=0){touch_count.innerHTML=kol;touch_count.className="rtext bg1 white";}'>-</td>
+                </tr>
+                <tr>
+                    <td colspan=2 class='center vcenter' onclick='touch_count.innerHTML="0";touch_count.className="rtext bg1 white";'>Сброс</td>
+                </tr>
+            </table>
+        </td>
+    </tr>
+    <tr  class='infoline' style='height:10%'>
+        <td class='sel center vcenter' style='width:50%' onclick='numtouch.hidden=true;tab.focus();'>Отменить</td>
+        <td class='sel center vcenter' onclick='put_kol();numtouch.hidden=true;tab.focus();'>Ввод</td>
+    </tr>
+</table>

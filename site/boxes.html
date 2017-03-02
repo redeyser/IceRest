@@ -1,0 +1,34 @@
+    <table class='tb hall wall' id='boxes'>
+    </table>
+<script>
+    // FIRST LOAD BOXES
+    loadboxes();
+
+function q_boxclick(t){
+    boxid=parseInt(t.id.substr(4));
+    if (boxes[boxid-1]['status']==0){
+        warn_alert("Открыть новую корзину?",do_openbox);
+        return;
+    }
+    WARN_ANSWER=true;
+    if (boxes[boxid-1]['status']<3){
+       async_get("/box/open?id="+boxid,openbox);
+    }
+}
+function do_openbox(){
+    if (!WARN_ANSWER){   return;    }
+    async_get("/box/open?id="+boxid,openbox);
+}
+function openbox(j){
+    json=JSON.parse(j);
+    if (!json['result']){
+        return;
+    }else{
+       _relocate('/box?id='+json['id']);
+    }
+}
+setInterval(
+    function() {
+        refboxes();
+    }, 2000);
+</script>

@@ -1,0 +1,46 @@
+<div class="wall hall" style="background:white">
+    <table class="norm wall hall" rules=all>
+        <tr class='ice zbig center' style='height:5%'>
+            <td colspan=2><img src="images/banner.jpg" style="width:100%"/></td>
+        </tr>
+        <tr class='ice zbig center' style='height:5%'>
+            <td>В РАБОТЕ</td>
+            <td>ГОТОВЫЕ</td>
+        </tr>
+        <tr>
+            <td > <table class='wall' id='work'></table></td>
+            <td > <table class='wall' id='comp'></table></td>
+        </tr>
+    </table>
+</div>
+
+<script>
+loadorder();
+function loadorder(){
+    async_get("/zakaz/list",_loadorder);
+}
+function _loadorder(t){
+    j=JSON.parse(t);
+    t1="";t2="";
+    i1=0;i2=0;
+    for ( i in j){
+        id = "0"+j[i]['id'];
+        id=id.substr(-2,2);
+        status=j[i]['status'];
+        if (status=='1'){  cl='fg_red'; }
+        if (status=='2'){  cl='fg_green'; }
+        if (status=='3'){  cl='fg_yellow'; }
+        l=id;
+        t= "<tr class='center vbig "+cl+"' ><td>"+l+"</td></tr>";
+        if (status<2){  if (i1<30){ t1+=t;i1+=1;}  }
+        else{ if (i2<30){t2+=t;i2+=1; } }
+    }
+    work.innerHTML=t1;
+    comp.innerHTML=t2;
+}
+setInterval(
+    function() {
+        loadorder();
+    }, 2000);
+</script>
+
